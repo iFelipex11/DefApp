@@ -1,0 +1,72 @@
+@page "/parametros-ensayo"
+@inject IRepository Repository
+
+<PageTitle>Parametros de Ensayo</PageTitle>
+
+<h3>Parametros de Ensayo</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando parametros de ensayo...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (parametrosEnsayo.Count == 0)
+{
+    <p>No hay parametros de ensayo registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Tipo de ensayo</th>
+                <th>Nombre</th>
+                <th>Unidad</th>
+                <th>Requerido</th>
+                <th>Calculado</th>
+                <th>Min.</th>
+                <th>Max.</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var parametro in parametrosEnsayo)
+            {
+                <tr>
+                    <td>@parametro.TipoEnsayo?.Nombre</td>
+                    <td>@parametro.Nombre</td>
+                    <td>@parametro.Unidad</td>
+                    <td>@(parametro.Requerido ? "Si" : "No")</td>
+                    <td>@(parametro.EsCalculado ? "Si" : "No")</td>
+                    <td>@parametro.MinReferencial</td>
+                    <td>@parametro.MaxReferencial</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ParametroEnsayo> parametrosEnsayo = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<ParametroEnsayo>>("api/parametrosensayo");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        parametrosEnsayo = response.Response ?? [];
+        isLoading = false;
+    }
+}
