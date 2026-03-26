@@ -21,17 +21,17 @@ public class AccountsController(IUserHelper userHelper, IConfiguration configura
 
     [AllowAnonymous]
     [HttpPost("CreateUser")]
-    public async Task<ActionResult> CreateUser([FromBody] LoginDTO model)
+    public async Task<ActionResult> CreateUser([FromBody] UserDTO model)
     {
         var user = new User
         {
-            Document = Guid.NewGuid().ToString("N")[..10],
-            FirstName = "Usuario",
-            LastName = "Suelos",
+            Document = model.Document,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
             Email = model.Email,
             UserName = model.Email,
-            Address = "Pendiente",
-            UserType = UserType.Analyst
+            Address = model.Address,
+            UserType = model.UserType
         };
 
         var result = await _userHelper.AddUserAsync(user, model.Password);
@@ -41,7 +41,7 @@ public class AccountsController(IUserHelper userHelper, IConfiguration configura
         }
 
         await _userHelper.AddUserToRoleAsync(user, user.UserType.ToString());
-        return Ok("Usuario creado correctamente.");
+        return Ok(BuildToken(user));
     }
 
     [AllowAnonymous]
