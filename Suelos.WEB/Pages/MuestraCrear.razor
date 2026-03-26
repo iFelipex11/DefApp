@@ -1,0 +1,130 @@
+@page "/muestras/crear"
+@inject IRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Crear Muestra</PageTitle>
+
+<h3>Crear Muestra</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando puntos de muestreo...</em></p>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="muestra" OnValidSubmit="CrearMuestraAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Punto de muestreo</label>
+            <InputSelect class="form-select" @bind-Value="muestra.PuntoMuestreoId">
+                <option value="0">Seleccione un punto de muestreo</option>
+                @foreach (var punto in puntosMuestreo)
+                {
+                    <option value="@punto.Id">@($"{punto.Proyecto?.Nombre} - {punto.Codigo}")</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Codigo de muestra</label>
+            <InputText class="form-control" @bind-Value="muestra.CodigoMuestra" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Fecha de muestreo</label>
+            <InputDate class="form-control" @bind-Value="muestra.FechaMuestreo" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Fecha de recepcion</label>
+            <InputDate class="form-control" @bind-Value="muestra.FechaRecepcion" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Profundidad inicial</label>
+            <InputNumber class="form-control" @bind-Value="muestra.ProfundidadInicial" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Profundidad final</label>
+            <InputNumber class="form-control" @bind-Value="muestra.ProfundidadFinal" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tipo de muestra</label>
+            <InputText class="form-control" @bind-Value="muestra.TipoMuestra" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <InputText class="form-control" @bind-Value="muestra.EstadoMuestra" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <InputText class="form-control" @bind-Value="muestra.Observaciones" />
+        </div>
+
+        <button class="btn btn-primary" type="submit" disabled="@isSaving">Guardar</button>
+        <a class="btn btn-secondary ms-2" href="/muestras">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    private readonly Muestra muestra = new()
+    {
+        EstadoMuestra = "Registrada"
+    };
+
+    private List<PuntoMuestreo> puntosMuestreo = [];
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<PuntoMuestreo>>("api/puntosmuestreo");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        puntosMuestreo = response.Response ?? [];
+        isLoading = false;
+    }
+
+    private async Task CrearMuestraAsync()
+    {
+        if (muestra.PuntoMuestreoId == 0)
+        {
+            errorMessage = "Debe seleccionar un punto de muestreo.";
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = null;
+
+        var response = await Repository.PostAsync("api/muestras", muestra);
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isSaving = false;
+            return;
+        }
+
+        NavigationManager.NavigateTo("/muestras");
+    }
+}
