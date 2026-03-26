@@ -1,0 +1,66 @@
+@page "/tipos-ensayo"
+@inject IRepository Repository
+
+<PageTitle>Tipos de Ensayo</PageTitle>
+
+<h3>Tipos de Ensayo</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando tipos de ensayo...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (tiposEnsayo.Count == 0)
+{
+    <p>No hay tipos de ensayo registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Nombre</th>
+                <th>Descripcion</th>
+                <th>Activo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tipoEnsayo in tiposEnsayo)
+            {
+                <tr>
+                    <td>@tipoEnsayo.Codigo</td>
+                    <td>@tipoEnsayo.Nombre</td>
+                    <td>@tipoEnsayo.Descripcion</td>
+                    <td>@(tipoEnsayo.Activo ? "Si" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TipoEnsayo> tiposEnsayo = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<TipoEnsayo>>("api/tiposensayo");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        tiposEnsayo = response.Response ?? [];
+        isLoading = false;
+    }
+}
