@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Codex local execution support
+ejecucion/
+docs/_codex_backup/
