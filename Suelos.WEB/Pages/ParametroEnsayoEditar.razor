@@ -1,0 +1,130 @@
+@page "/parametros-ensayo/editar/{Id:int}"
+@inject IRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Editar Parametro de Ensayo</PageTitle>
+
+<h3>Editar Parametro de Ensayo</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando parametro de ensayo...</em></p>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="parametroEnsayo" OnValidSubmit="GuardarCambiosAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Tipo de ensayo</label>
+            <InputSelect class="form-select" @bind-Value="parametroEnsayo.TipoEnsayoId">
+                <option value="0">Seleccione un tipo de ensayo</option>
+                @foreach (var tipo in tiposEnsayo)
+                {
+                    <option value="@tipo.Id">@tipo.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="parametroEnsayo.Nombre" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Unidad</label>
+            <InputText class="form-control" @bind-Value="parametroEnsayo.Unidad" />
+        </div>
+
+        <div class="form-check mb-2">
+            <InputCheckbox class="form-check-input" @bind-Value="parametroEnsayo.Requerido" />
+            <label class="form-check-label">Requerido</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <InputCheckbox class="form-check-input" @bind-Value="parametroEnsayo.EsCalculado" />
+            <label class="form-check-label">Es calculado</label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Minimo referencial</label>
+            <InputNumber class="form-control" @bind-Value="parametroEnsayo.MinReferencial" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Maximo referencial</label>
+            <InputNumber class="form-control" @bind-Value="parametroEnsayo.MaxReferencial" />
+        </div>
+
+        <button class="btn btn-primary" type="submit" disabled="@isSaving">Guardar cambios</button>
+        <a class="btn btn-secondary ms-2" href="/parametros-ensayo">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ParametroEnsayo parametroEnsayo = new();
+    private List<TipoEnsayo> tiposEnsayo = [];
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tiposResponse = await Repository.GetAsync<List<TipoEnsayo>>("api/tiposensayo");
+
+        if (tiposResponse.Error)
+        {
+            errorMessage = await tiposResponse.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        tiposEnsayo = tiposResponse.Response ?? [];
+
+        var parametroResponse = await Repository.GetAsync<ParametroEnsayo>($"api/parametrosensayo/{Id}");
+
+        if (parametroResponse.Error)
+        {
+            errorMessage = await parametroResponse.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        parametroEnsayo = parametroResponse.Response ?? new ParametroEnsayo();
+        isLoading = false;
+    }
+
+    private async Task GuardarCambiosAsync()
+    {
+        if (parametroEnsayo.TipoEnsayoId == 0)
+        {
+            errorMessage = "Debe seleccionar un tipo de ensayo.";
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = null;
+
+        var response = await Repository.PutAsync("api/parametrosensayo", parametroEnsayo);
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isSaving = false;
+            return;
+        }
+
+        NavigationManager.NavigateTo("/parametros-ensayo");
+    }
+}

@@ -5,6 +5,10 @@
 
 <h3>Parametros de Ensayo</h3>
 
+<p>
+    <a class="btn btn-primary" href="/parametros-ensayo/crear">Nuevo parametro de ensayo</a>
+</p>
+
 @if (isLoading)
 {
     <p><em>Cargando parametros de ensayo...</em></p>
@@ -31,6 +35,7 @@ else
                 <th>Calculado</th>
                 <th>Min.</th>
                 <th>Max.</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -44,6 +49,9 @@ else
                     <td>@(parametro.EsCalculado ? "Si" : "No")</td>
                     <td>@parametro.MinReferencial</td>
                     <td>@parametro.MaxReferencial</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/parametros-ensayo/editar/{parametro.Id}")">Editar</a>
+                    </td>
                 </tr>
             }
         </tbody>
