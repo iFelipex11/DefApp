@@ -1,0 +1,68 @@
+@page "/proyectos"
+@using Suelos.Shared.Entities
+@using Suelos.WEB.Repositories
+@inject IRepository Repository
+
+<PageTitle>Proyectos</PageTitle>
+
+<h3>Proyectos</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando proyectos...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (proyectos.Count == 0)
+{
+    <p>No hay proyectos registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Cliente</th>
+                <th>Ubicacion</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var proyecto in proyectos)
+            {
+                <tr>
+                    <td>@proyecto.Nombre</td>
+                    <td>@proyecto.Cliente</td>
+                    <td>@proyecto.Ubicacion</td>
+                    <td>@proyecto.Estado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Proyecto> proyectos = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<Proyecto>>("api/proyectos");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        proyectos = response.Response ?? [];
+        isLoading = false;
+    }
+}
