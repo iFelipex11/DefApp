@@ -34,6 +34,7 @@ else
                 <th>Descripcion</th>
                 <th>Coordenada X</th>
                 <th>Coordenada Y</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,9 @@ else
                     <td>@punto.Descripcion</td>
                     <td>@punto.CoordenadaX</td>
                     <td>@punto.CoordenadaY</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/puntos-muestreo/editar/{punto.Id}")">Editar</a>
+                    </td>
                 </tr>
             }
         </tbody>
