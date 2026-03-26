@@ -1,11 +1,13 @@
 @page "/proyectos"
-@using Suelos.Shared.Entities
-@using Suelos.WEB.Repositories
 @inject IRepository Repository
 
 <PageTitle>Proyectos</PageTitle>
 
 <h3>Proyectos</h3>
+
+<p>
+    <a class="btn btn-primary" href="/proyectos/crear">Nuevo proyecto</a>
+</p>
 
 @if (isLoading)
 {

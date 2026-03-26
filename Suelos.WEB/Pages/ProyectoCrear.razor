@@ -1,0 +1,69 @@
+@page "/proyectos/crear"
+@inject IRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Crear Proyecto</PageTitle>
+
+<h3>Crear Proyecto</h3>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<EditForm Model="proyecto" OnValidSubmit="CrearProyectoAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText class="form-control" @bind-Value="proyecto.Nombre" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cliente</label>
+        <InputText class="form-control" @bind-Value="proyecto.Cliente" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ubicacion</label>
+        <InputText class="form-control" @bind-Value="proyecto.Ubicacion" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <InputText class="form-control" @bind-Value="proyecto.Estado" />
+    </div>
+
+    <button class="btn btn-primary" type="submit" disabled="@isSaving">Guardar</button>
+    <a class="btn btn-secondary ms-2" href="/proyectos">Cancelar</a>
+</EditForm>
+
+@code {
+    private readonly Proyecto proyecto = new()
+    {
+        Estado = "Activo"
+    };
+
+    private bool isSaving;
+    private string? errorMessage;
+
+    private async Task CrearProyectoAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        var response = await Repository.PostAsync("api/proyectos", proyecto);
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isSaving = false;
+            return;
+        }
+
+        NavigationManager.NavigateTo("/proyectos");
+    }
+}
