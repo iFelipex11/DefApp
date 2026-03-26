@@ -1,0 +1,72 @@
+@page "/ensayos-realizados"
+@inject IRepository Repository
+
+<PageTitle>Ensayos Realizados</PageTitle>
+
+<h3>Ensayos Realizados</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando ensayos realizados...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (ensayosRealizados.Count == 0)
+{
+    <p>No hay ensayos realizados registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Muestra</th>
+                <th>Punto</th>
+                <th>Tipo de ensayo</th>
+                <th>Fecha asignacion</th>
+                <th>Fecha ejecucion</th>
+                <th>Responsable</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ensayo in ensayosRealizados)
+            {
+                <tr>
+                    <td>@ensayo.Muestra?.CodigoMuestra</td>
+                    <td>@ensayo.Muestra?.PuntoMuestreo?.Codigo</td>
+                    <td>@ensayo.TipoEnsayo?.Nombre</td>
+                    <td>@ensayo.FechaAsignacion.ToShortDateString()</td>
+                    <td>@ensayo.FechaEjecucion.ToShortDateString()</td>
+                    <td>@ensayo.Responsable</td>
+                    <td>@ensayo.Estado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EnsayoRealizado> ensayosRealizados = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<EnsayoRealizado>>("api/ensayosrealizados");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        ensayosRealizados = response.Response ?? [];
+        isLoading = false;
+    }
+}
