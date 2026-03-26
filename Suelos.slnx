@@ -1,2 +1,5 @@
 <Solution>
+  <Project Path="Suelos.API/Suelos.API.csproj" />
+  <Project Path="Suelos.Shared/Suelos.Shared.csproj" />
+  <Project Path="Suelos.WEB/Suelos.WEB.csproj" />
 </Solution>
