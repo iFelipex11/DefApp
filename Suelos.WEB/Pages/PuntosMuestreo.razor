@@ -1,5 +1,6 @@
 @page "/puntos-muestreo"
 @inject IRepository Repository
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Puntos de Muestreo</PageTitle>
 
@@ -49,6 +50,11 @@ else
                     <td>@punto.CoordenadaY</td>
                     <td>
                         <a class="btn btn-sm btn-outline-primary" href="@($"/puntos-muestreo/editar/{punto.Id}")">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger ms-2"
+                                @onclick="() => EliminarPuntoMuestreoAsync(punto)"
+                                disabled="@isDeleting">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
             }
@@ -59,9 +65,15 @@ else
 @code {
     private List<PuntoMuestreo> puntosMuestreo = [];
     private bool isLoading = true;
+    private bool isDeleting;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
+    {
+        await CargarPuntosMuestreoAsync();
+    }
+
+    private async Task CargarPuntosMuestreoAsync()
     {
         var response = await Repository.GetAsync<List<PuntoMuestreo>>("api/puntosmuestreo");
 
@@ -74,5 +86,32 @@ else
 
         puntosMuestreo = response.Response ?? [];
         isLoading = false;
+    }
+
+    private async Task EliminarPuntoMuestreoAsync(PuntoMuestreo puntoMuestreo)
+    {
+        var confirmar = await JSRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"Se eliminara el punto de muestreo '{puntoMuestreo.Codigo}'. Deseas continuar?");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        var response = await Repository.DeleteAsync($"api/puntosmuestreo/{puntoMuestreo.Id}");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isDeleting = false;
+            return;
+        }
+
+        await CargarPuntosMuestreoAsync();
+        isDeleting = false;
     }
 }
