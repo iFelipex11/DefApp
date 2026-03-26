@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Suelos.WEB;
 using Microsoft.AspNetCore.Components.Authorization;
 using Suelos.WEB.Auth;
+using Suelos.WEB.Repositories;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5274/") });
+builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationProviderJWT>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(
