@@ -1,0 +1,70 @@
+@page "/resultados-parametro"
+@inject IRepository Repository
+
+<PageTitle>Resultados por Parametro</PageTitle>
+
+<h3>Resultados por Parametro</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando resultados...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (resultadosParametro.Count == 0)
+{
+    <p>No hay resultados registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Muestra</th>
+                <th>Tipo de ensayo</th>
+                <th>Parametro</th>
+                <th>Valor</th>
+                <th>Cumple rango</th>
+                <th>Observacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resultado in resultadosParametro)
+            {
+                <tr>
+                    <td>@resultado.EnsayoRealizado?.Muestra?.CodigoMuestra</td>
+                    <td>@resultado.ParametroEnsayo?.TipoEnsayo?.Nombre</td>
+                    <td>@resultado.ParametroEnsayo?.Nombre</td>
+                    <td>@resultado.Valor</td>
+                    <td>@(resultado.CumpleRango ? "Si" : "No")</td>
+                    <td>@resultado.Observacion</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ResultadoParametro> resultadosParametro = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<ResultadoParametro>>("api/resultados");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        resultadosParametro = response.Response ?? [];
+        isLoading = false;
+    }
+}
