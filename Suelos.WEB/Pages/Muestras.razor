@@ -1,0 +1,70 @@
+@page "/muestras"
+@inject IRepository Repository
+
+<PageTitle>Muestras</PageTitle>
+
+<h3>Muestras</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando muestras...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (muestras.Count == 0)
+{
+    <p>No hay muestras registradas.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Proyecto</th>
+                <th>Punto</th>
+                <th>Fecha muestreo</th>
+                <th>Fecha recepcion</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var muestra in muestras)
+            {
+                <tr>
+                    <td>@muestra.CodigoMuestra</td>
+                    <td>@muestra.PuntoMuestreo?.Proyecto?.Nombre</td>
+                    <td>@muestra.PuntoMuestreo?.Codigo</td>
+                    <td>@muestra.FechaMuestreo.ToShortDateString()</td>
+                    <td>@muestra.FechaRecepcion.ToShortDateString()</td>
+                    <td>@muestra.EstadoMuestra</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Muestra> muestras = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<Muestra>>("api/muestras");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        muestras = response.Response ?? [];
+        isLoading = false;
+    }
+}
