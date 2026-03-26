@@ -1,0 +1,98 @@
+@page "/proyectos/editar/{Id:int}"
+@inject IRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Editar Proyecto</PageTitle>
+
+<h3>Editar Proyecto</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando proyecto...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(loadErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @loadErrorMessage
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(saveErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @saveErrorMessage
+        </div>
+    }
+
+    <EditForm Model="proyecto" OnValidSubmit="GuardarCambiosAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="proyecto.Nombre" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cliente</label>
+            <InputText class="form-control" @bind-Value="proyecto.Cliente" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ubicacion</label>
+            <InputText class="form-control" @bind-Value="proyecto.Ubicacion" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <InputText class="form-control" @bind-Value="proyecto.Estado" />
+        </div>
+
+        <button class="btn btn-primary" type="submit" disabled="@isSaving">Guardar cambios</button>
+        <a class="btn btn-secondary ms-2" href="/proyectos">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Proyecto proyecto = new();
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? loadErrorMessage;
+    private string? saveErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<Proyecto>($"api/proyectos/{Id}");
+
+        if (response.Error)
+        {
+            loadErrorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        proyecto = response.Response ?? new Proyecto();
+        isLoading = false;
+    }
+
+    private async Task GuardarCambiosAsync()
+    {
+        isSaving = true;
+        saveErrorMessage = null;
+
+        var response = await Repository.PutAsync("api/proyectos", proyecto);
+
+        if (response.Error)
+        {
+            saveErrorMessage = await response.GetErrorMessageAsync();
+            isSaving = false;
+            return;
+        }
+
+        NavigationManager.NavigateTo("/proyectos");
+    }
+}

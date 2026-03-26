@@ -1,5 +1,6 @@
 @page "/proyectos"
 @inject IRepository Repository
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Proyectos</PageTitle>
 
@@ -32,6 +33,7 @@ else
                 <th>Cliente</th>
                 <th>Ubicacion</th>
                 <th>Estado</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -42,6 +44,14 @@ else
                     <td>@proyecto.Cliente</td>
                     <td>@proyecto.Ubicacion</td>
                     <td>@proyecto.Estado</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/proyectos/editar/{proyecto.Id}")">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger ms-2"
+                                @onclick="() => EliminarProyectoAsync(proyecto)"
+                                disabled="@isDeleting">
+                            Eliminar
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -51,9 +61,15 @@ else
 @code {
     private List<Proyecto> proyectos = [];
     private bool isLoading = true;
+    private bool isDeleting;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
+    {
+        await CargarProyectosAsync();
+    }
+
+    private async Task CargarProyectosAsync()
     {
         var response = await Repository.GetAsync<List<Proyecto>>("api/proyectos");
 
@@ -66,5 +82,32 @@ else
 
         proyectos = response.Response ?? [];
         isLoading = false;
+    }
+
+    private async Task EliminarProyectoAsync(Proyecto proyecto)
+    {
+        var confirmar = await JSRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"Se eliminara el proyecto '{proyecto.Nombre}'. Deseas continuar?");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        var response = await Repository.DeleteAsync($"api/proyectos/{proyecto.Id}");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isDeleting = false;
+            return;
+        }
+
+        await CargarProyectosAsync();
+        isDeleting = false;
     }
 }
