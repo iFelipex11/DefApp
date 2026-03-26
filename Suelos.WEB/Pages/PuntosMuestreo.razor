@@ -1,0 +1,70 @@
+@page "/puntos-muestreo"
+@inject IRepository Repository
+
+<PageTitle>Puntos de Muestreo</PageTitle>
+
+<h3>Puntos de Muestreo</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando puntos de muestreo...</em></p>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if (puntosMuestreo.Count == 0)
+{
+    <p>No hay puntos de muestreo registrados.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Proyecto</th>
+                <th>Sector</th>
+                <th>Descripcion</th>
+                <th>Coordenada X</th>
+                <th>Coordenada Y</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var punto in puntosMuestreo)
+            {
+                <tr>
+                    <td>@punto.Codigo</td>
+                    <td>@punto.Proyecto?.Nombre</td>
+                    <td>@punto.Sector</td>
+                    <td>@punto.Descripcion</td>
+                    <td>@punto.CoordenadaX</td>
+                    <td>@punto.CoordenadaY</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PuntoMuestreo> puntosMuestreo = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<List<PuntoMuestreo>>("api/puntosmuestreo");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        puntosMuestreo = response.Response ?? [];
+        isLoading = false;
+    }
+}
