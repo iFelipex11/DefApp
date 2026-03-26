@@ -1,5 +1,6 @@
 @page "/muestras"
 @inject IRepository Repository
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Muestras</PageTitle>
 
@@ -49,6 +50,11 @@ else
                     <td>@muestra.EstadoMuestra</td>
                     <td>
                         <a class="btn btn-sm btn-outline-primary" href="@($"/muestras/editar/{muestra.Id}")">Editar</a>
+                        <button class="btn btn-sm btn-outline-danger ms-2"
+                                @onclick="() => EliminarMuestraAsync(muestra)"
+                                disabled="@isDeleting">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
             }
@@ -59,9 +65,15 @@ else
 @code {
     private List<Muestra> muestras = [];
     private bool isLoading = true;
+    private bool isDeleting;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
+    {
+        await CargarMuestrasAsync();
+    }
+
+    private async Task CargarMuestrasAsync()
     {
         var response = await Repository.GetAsync<List<Muestra>>("api/muestras");
 
@@ -74,5 +86,32 @@ else
 
         muestras = response.Response ?? [];
         isLoading = false;
+    }
+
+    private async Task EliminarMuestraAsync(Muestra muestra)
+    {
+        var confirmar = await JSRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"Se eliminara la muestra '{muestra.CodigoMuestra}'. Deseas continuar?");
+
+        if (!confirmar)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        var response = await Repository.DeleteAsync($"api/muestras/{muestra.Id}");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isDeleting = false;
+            return;
+        }
+
+        await CargarMuestrasAsync();
+        isDeleting = false;
     }
 }
