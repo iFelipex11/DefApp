@@ -25,6 +25,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<EnsayoRealizado>().HasIndex(x => new { x.MuestraId, x.TipoEnsayoId }).IsUnique();
         modelBuilder.Entity<ResultadoParametro>().HasIndex(x => new { x.EnsayoRealizadoId, x.ParametroEnsayoId }).IsUnique();
 
+        modelBuilder.Entity<Muestra>()
+            .Property(x => x.ProfundidadInicial)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Muestra>()
+            .Property(x => x.ProfundidadFinal)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ParametroEnsayo>()
+            .Property(x => x.MinReferencial)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ParametroEnsayo>()
+            .Property(x => x.MaxReferencial)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ResultadoParametro>()
+            .Property(x => x.Valor)
+            .HasPrecision(18, 2);
+
         modelBuilder.Entity<PuntoMuestreo>()
             .HasOne(x => x.Proyecto)
             .WithMany(x => x.PuntosMuestreo)

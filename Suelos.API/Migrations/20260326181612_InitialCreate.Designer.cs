@@ -12,7 +12,7 @@ using Suelos.API.Data;
 namespace Suelos.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260326180748_InitialCreate")]
+    [Migration("20260326181612_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -229,9 +229,11 @@ namespace Suelos.API.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<decimal?>("ProfundidadFinal")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("ProfundidadInicial")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("PuntoMuestreoId")
@@ -263,9 +265,11 @@ namespace Suelos.API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MaxReferencial")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MinReferencial")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Nombre")
@@ -389,6 +393,7 @@ namespace Suelos.API.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Valor")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");

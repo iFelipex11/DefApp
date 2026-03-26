@@ -228,8 +228,8 @@ namespace Suelos.API.Migrations
                     Unidad = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Requerido = table.Column<bool>(type: "bit", nullable: false),
                     EsCalculado = table.Column<bool>(type: "bit", nullable: false),
-                    MinReferencial = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    MaxReferencial = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                    MinReferencial = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    MaxReferencial = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -252,8 +252,8 @@ namespace Suelos.API.Migrations
                     CodigoMuestra = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     FechaRecepcion = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FechaMuestreo = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProfundidadInicial = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    ProfundidadFinal = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    ProfundidadInicial = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    ProfundidadFinal = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     TipoMuestra = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     EstadoMuestra = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Observaciones = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true)
@@ -308,7 +308,7 @@ namespace Suelos.API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EnsayoRealizadoId = table.Column<int>(type: "int", nullable: false),
                     ParametroEnsayoId = table.Column<int>(type: "int", nullable: false),
-                    Valor = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Valor = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     Observacion = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     CumpleRango = table.Column<bool>(type: "bit", nullable: false),
                     ObservacionTecnica = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true)
