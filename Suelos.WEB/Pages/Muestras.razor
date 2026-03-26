@@ -34,6 +34,7 @@ else
                 <th>Fecha muestreo</th>
                 <th>Fecha recepcion</th>
                 <th>Estado</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,9 @@ else
                     <td>@muestra.FechaMuestreo.ToShortDateString()</td>
                     <td>@muestra.FechaRecepcion.ToShortDateString()</td>
                     <td>@muestra.EstadoMuestra</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/muestras/editar/{muestra.Id}")">Editar</a>
+                    </td>
                 </tr>
             }
         </tbody>
