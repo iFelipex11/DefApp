@@ -1,0 +1,91 @@
+@page "/tipos-ensayo/editar/{Id:int}"
+@inject IRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Editar Tipo de Ensayo</PageTitle>
+
+<h3>Editar Tipo de Ensayo</h3>
+
+@if (isLoading)
+{
+    <p><em>Cargando tipo de ensayo...</em></p>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="tipoEnsayo" OnValidSubmit="GuardarCambiosAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Codigo</label>
+            <InputText class="form-control" @bind-Value="tipoEnsayo.Codigo" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="tipoEnsayo.Nombre" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripcion</label>
+            <InputText class="form-control" @bind-Value="tipoEnsayo.Descripcion" />
+        </div>
+
+        <div class="form-check mb-3">
+            <InputCheckbox class="form-check-input" @bind-Value="tipoEnsayo.Activo" />
+            <label class="form-check-label">Activo</label>
+        </div>
+
+        <button class="btn btn-primary" type="submit" disabled="@isSaving">Guardar cambios</button>
+        <a class="btn btn-secondary ms-2" href="/tipos-ensayo">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private TipoEnsayo tipoEnsayo = new();
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Repository.GetAsync<TipoEnsayo>($"api/tiposensayo/{Id}");
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isLoading = false;
+            return;
+        }
+
+        tipoEnsayo = response.Response ?? new TipoEnsayo();
+        isLoading = false;
+    }
+
+    private async Task GuardarCambiosAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        var response = await Repository.PutAsync("api/tiposensayo", tipoEnsayo);
+
+        if (response.Error)
+        {
+            errorMessage = await response.GetErrorMessageAsync();
+            isSaving = false;
+            return;
+        }
+
+        NavigationManager.NavigateTo("/tipos-ensayo");
+    }
+}

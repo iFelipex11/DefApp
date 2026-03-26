@@ -5,6 +5,10 @@
 
 <h3>Tipos de Ensayo</h3>
 
+<p>
+    <a class="btn btn-primary" href="/tipos-ensayo/crear">Nuevo tipo de ensayo</a>
+</p>
+
 @if (isLoading)
 {
     <p><em>Cargando tipos de ensayo...</em></p>
@@ -28,6 +32,7 @@ else
                 <th>Nombre</th>
                 <th>Descripcion</th>
                 <th>Activo</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -38,6 +43,9 @@ else
                     <td>@tipoEnsayo.Nombre</td>
                     <td>@tipoEnsayo.Descripcion</td>
                     <td>@(tipoEnsayo.Activo ? "Si" : "No")</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/tipos-ensayo/editar/{tipoEnsayo.Id}")">Editar</a>
+                    </td>
                 </tr>
             }
         </tbody>
