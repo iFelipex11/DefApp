@@ -17,27 +17,34 @@ public class AuthenticationProviderJWT(IJSRuntime jsRuntime, HttpClient httpClie
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await _jsRuntime.GetLocalStorage(TokenKey);
-        var tokenString = token?.ToString();
+        var token = await _jsRuntime.GetSessionStorage(TokenKey);
 
-        if (string.IsNullOrWhiteSpace(tokenString))
+        if (string.IsNullOrWhiteSpace(token))
         {
+            _httpClient.DefaultRequestHeaders.Authorization = null;
             return _anonymous;
         }
 
-        return BuildAuthenticationState(tokenString);
+        if (TokenExpired(token))
+        {
+            await _jsRuntime.RemoveSessionStorage(TokenKey);
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+            return _anonymous;
+        }
+
+        return BuildAuthenticationState(token);
     }
 
     public async Task LoginAsync(string token)
     {
-        await _jsRuntime.SetLocalStorage(TokenKey, token);
+        await _jsRuntime.SetSessionStorage(TokenKey, token);
         var authState = BuildAuthenticationState(token);
         NotifyAuthenticationStateChanged(Task.FromResult(authState));
     }
 
     public async Task LogoutAsync()
     {
-        await _jsRuntime.RemoveLocalStorage(TokenKey);
+        await _jsRuntime.RemoveSessionStorage(TokenKey);
         _httpClient.DefaultRequestHeaders.Authorization = null;
         NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
     }
@@ -54,5 +61,11 @@ public class AuthenticationProviderJWT(IJSRuntime jsRuntime, HttpClient httpClie
         var handler = new JwtSecurityTokenHandler();
         var jwtSecurityToken = handler.ReadJwtToken(token);
         return jwtSecurityToken.Claims;
+    }
+
+    private static bool TokenExpired(string token)
+    {
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        return jwt.ValidTo <= DateTime.UtcNow;
     }
 }

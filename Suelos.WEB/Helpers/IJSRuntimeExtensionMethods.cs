@@ -4,18 +4,18 @@ namespace Suelos.WEB.Helpers;
 
 public static class IJSRuntimeExtensionMethods
 {
-    public static ValueTask<object> SetLocalStorage(this IJSRuntime js, string key, string content)
+    public static ValueTask<object?> SetSessionStorage(this IJSRuntime js, string key, string content)
     {
-        return js.InvokeAsync<object>("localStorage.setItem", key, content);
+        return js.InvokeAsync<object?>("sessionStorage.setItem", key, content);
     }
 
-    public static ValueTask<object> GetLocalStorage(this IJSRuntime js, string key)
+    public static async ValueTask<string?> GetSessionStorage(this IJSRuntime js, string key)
     {
-        return js.InvokeAsync<object>("localStorage.getItem", key);
+        return await js.InvokeAsync<string?>("sessionStorage.getItem", key);
     }
 
-    public static ValueTask<object> RemoveLocalStorage(this IJSRuntime js, string key)
+    public static ValueTask<object?> RemoveSessionStorage(this IJSRuntime js, string key)
     {
-        return js.InvokeAsync<object>("localStorage.removeItem", key);
+        return js.InvokeAsync<object?>("sessionStorage.removeItem", key);
     }
 }

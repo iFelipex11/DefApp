@@ -1,8 +1,7 @@
-@page "/"
 @page "/login"
 @attribute [AllowAnonymous]
 @layout EmptyLayout
-@inject IRepository Repository
+@inject HttpClient Http
 @inject ILoginService LoginService
 @inject NavigationManager NavigationManager
 
@@ -37,7 +36,9 @@
                             <InputText class="form-control" type="password" @bind-Value="loginModel.Password" />
                         </div>
 
-                        <button class="btn btn-primary w-100" type="submit" disabled="@isSaving">Entrar</button>
+                        <button class="btn btn-primary w-100" type="submit" disabled="@isSaving">
+                            @(isSaving ? "Ingresando..." : "Entrar")
+                        </button>
                     </EditForm>
                 </div>
             </div>
@@ -55,18 +56,33 @@
         isSaving = true;
         errorMessage = null;
 
-        var response = await Repository.PostAsync<LoginDTO, TokenDTO>("api/accounts/login", loginModel);
-
-        if (response.Error || response.Response is null)
+        try
         {
-            errorMessage = response.Error
-                ? await response.GetErrorMessageAsync()
-                : "No fue posible iniciar sesion.";
-            isSaving = false;
-            return;
-        }
+            var response = await Http.PostAsJsonAsync("api/accounts/login", loginModel);
 
-        await LoginService.LoginAsync(response.Response.Token);
-        NavigationManager.NavigateTo("/proyectos", true);
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await response.Content.ReadAsStringAsync();
+                return;
+            }
+
+            var token = await response.Content.ReadFromJsonAsync<TokenDTO>();
+            if (token is null || string.IsNullOrWhiteSpace(token.Token))
+            {
+                errorMessage = "No fue posible obtener el token de acceso.";
+                return;
+            }
+
+            await LoginService.LoginAsync(token.Token);
+            NavigationManager.NavigateTo("/", true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al iniciar sesion: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 }
